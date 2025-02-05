@@ -18,8 +18,8 @@ public class TransferenciaService {
         return repository.save(transferencia);
     }
 
-//    public List<Transferencia> listarTransferencias() {
-//
-//        return repository.findAll();
+    public List<Transferencia> listarTransferencias() {
+
+        return repository.findAll();
     }
-//}
+}

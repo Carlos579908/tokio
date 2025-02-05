@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Getter
 @NoArgsConstructor
@@ -26,31 +27,37 @@ public class Transferencia {
     private LocalDate dataTransferencia;
     private LocalDate dataAgendamento = LocalDate.now();
 
-    public Transferencia(String contaOrigem, String contaDestino, Double valor, LocalDate dataTransferencia) {
+
+    public Transferencia(String contaOrigem, String contaDestino, double valor, LocalDate dataTransferencia) {
         this.contaOrigem = contaOrigem;
         this.contaDestino = contaDestino;
         this.valor = valor;
         this.dataTransferencia = dataTransferencia;
-        this.taxa = calcularTaxa();
+        this.dataAgendamento = LocalDate.now();
+        this.taxa = calcularTaxa(valor, dataAgendamento, dataTransferencia);
     }
 
-    public Double calcularTaxa() {
-        long dias = LocalDate.now().until(this.dataTransferencia).getDays();
-        if (dias == 0) return 3.00 + (this.valor * 0.025);
-        if (dias >= 1 && dias <= 10) return 12.00;
-        if (dias >= 11 && dias <= 20) return this.valor * 0.082;
-        if (dias >= 21 && dias <= 30) return this.valor * 0.069;
-        if (dias >= 31 && dias <= 40) return this.valor * 0.047;
-        if (dias >= 41 && dias <= 50) return this.valor * 0.017;
-        throw new IllegalArgumentException("Transferência não permitida para mais de 50 dias");
+    private double calcularTaxa(double valor, LocalDate dataAgendamento, LocalDate dataTransferencia) {
+        long dias = ChronoUnit.DAYS.between(dataAgendamento, dataTransferencia);
+
+        if (dias == 0) {
+            return valor * 0.03 + 3.00; // Transferência no mesmo dia
+        } else if (dias <= 10) {
+            return valor * 0.08; // Entre 1 e 10 dias
+        } else if (dias <= 20) {
+            return valor * 0.06; // Entre 11 e 20 dias
+        } else if (dias <= 30) {
+            return valor * 0.04; // Entre 21 e 30 dias
+        } else {
+            return valor * 0.02; // Acima de 30 dias
+        }
     }
 
-    public Long getId() { return id; }
-    public String getContaOrigem() { return contaOrigem; }
-    public String getContaDestino() { return contaDestino; }
-    public Double getValor() { return valor; }
-    public Double getTaxa() { return taxa; }
-    public LocalDate getDataTransferencia() { return dataTransferencia; }
-    public LocalDate getDataAgendamento() { return dataAgendamento; }
+    @Override
+    public String toString() {
+        return "Transferência agendada: " +
+                "Origem: " + contaOrigem + ", Destino: " + contaDestino + ", Valor: R$ " + valor +
+                ", Taxa: R$ " + taxa + ", Data de Transferência: " + dataTransferencia +
+                ", Data de Agendamento: " + dataAgendamento;
+    }
 }
-
